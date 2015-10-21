@@ -53,31 +53,7 @@ class DataTable(object):
             self.columns_dict[d.name] = d
 
         for column in (col for col in self.columns if "." in col.model_name):
-            self.query = self.query.join(column.model_name.split(".")[0], aliased=True)
-
-    def query_into_dict(self, key_start):
-        returner = defaultdict(dict)
-
-        # Matches columns[number][key] with an [optional_value] on the end
-        pattern = "{}(?:\[(\d+)\])?\[(\w+)\](?:\[(\w+)\])?".format(key_start)
-
-        columns = (param for param in self.params if re.match(pattern, param))
-
-        for param in columns:
-
-            column_id, key, optional_subkey = re.search(pattern, param).groups()
-
-            if column_id is None:
-                returner[key] = self.coerce_value(key, self.params[param])
-            elif optional_subkey is None:
-                returner[int(column_id)][key] = self.coerce_value(key, self.params[param])
-            else:
-                # Oh baby a triple
-                subdict = returner[int(column_id)].setdefault(key, {})
-                subdict[optional_subkey] = self.coerce_value("{}.{}".format(key, optional_subkey),
-                                                             self.params[param])
-
-        return dict(returner)
+            self.query = self.query.join(column.model_name.split(".")[0])
 
     @staticmethod
     def coerce_value(key, value):
@@ -127,9 +103,9 @@ class DataTable(object):
         start = self.get_integer_param("start")
         length = self.get_integer_param("length")
 
-        columns = self.query_into_dict("columns")
-        ordering = self.query_into_dict("order")
-        search = self.query_into_dict("search")
+        columns = self.params["columns"]
+        ordering = self.params["order"]
+        search = self.params["search"]
 
         query = self.query
         total_records = query.count()
@@ -139,6 +115,7 @@ class DataTable(object):
 
         for order in ordering.values():
             direction, column = order["dir"], order["column"]
+            column = int(column)
 
             if column not in columns:
                 raise DataTablesError("Cannot order {}: column not found".format(column))
