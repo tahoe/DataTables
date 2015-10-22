@@ -29,8 +29,8 @@ class DataTable(object):
             name, model_name, filter_func = None, None, None
 
             if isinstance(col, DataColumn):
-                self.columns.append(col)
-                continue
+                d = col
+                self.columns.append(d)
             elif isinstance(col, tuple):
                 # col is either 1. (name, model_name), 2. (name, filter) or 3. (name, model_name, filter)
                 if len(col) == 3:
@@ -44,12 +44,13 @@ class DataTable(object):
                         name, model_name = col
                 else:
                     raise ValueError("Columns must be a tuple of 2 to 3 elements")
+                d = DataColumn(name=name, model_name=model_name, filter=filter_func)
+                self.columns.append(d)
             else:
                 # It's just a string
                 name, model_name = col, col
-
-            d = DataColumn(name=name, model_name=model_name, filter=filter_func)
-            self.columns.append(d)
+                d = DataColumn(name=name, model_name=model_name)
+                self.columns.append(d)
             self.columns_dict[d.name] = d
 
         for column in (col for col in self.columns if "." in col.model_name):
@@ -166,8 +167,11 @@ class DataTable(object):
                 instance = getattr(instance, sub)
 
         if key.filter is not None:
-            r = key.filter(instance)
+            r = key.filter(instance, attr)
         else:
             r = getattr(instance, attr)
 
         return r() if inspect.isroutine(r) else r
+
+
+
