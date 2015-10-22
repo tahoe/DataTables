@@ -167,7 +167,7 @@ class DataTable(object):
                 instance = getattr(instance, sub)
 
         if key.filter is not None:
-            r = key.filter(instance, attr)
+            r = key.filter(getattr(instance, attr))
         else:
             r = getattr(instance, attr)
 
