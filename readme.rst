@@ -15,10 +15,38 @@ Usage
 
 NEEDS EDIT
 
-Using Datatables is simple. Construct a DataTable instance by passing it your request parameters (or another dict-like
-object), your model class, a base query and a set of columns. The columns list can contain simple strings which are
-column names, or tuples containing (datatable_name, model_name), (datatable_name, model_name, filter_function) or
-(datatable_name, filter_function).
+This is SUPER simple. In datatables I provide a function called get_resource that can be used to create a
+datatables api endpoint with full flask-restless style filtering built in.
+
+I'll try to pull in some examples from a backbone.js app later.
+
+If you write a function on your SA Base class that returns a list of child table objects then you can do
+something like this:
+
+.. code-block:: python
+    for tableObj in MyBase.myclasses():
+        # generate the Resource object that uses DataTable
+        resource, path, endpoint = get_resource(Resource, tableObj, Session, basepath="/")
+        # add the Resource to the API object
+        #print resource, path, endpoint
+        api.add_resource(resource, path, endpoint=endpoint)
+
+Example myclasses method on the MyBase class
+
+.. code-block:: python
+
+    class MyBase(Base):
+        
+        @classmethod
+        def myclasses(cls):
+            """
+                Just returns a list of the child classes to this class
+            """
+            mine=[cls for cls in cls.__subclasses__()]
+            return mine
+
+
+
 
 Additional data such as hyperlinks can be added via DataTable.add_data, which accepts a callable that is called for
 each instance. Check out the usage example below for more info.
