@@ -1,6 +1,81 @@
-from collections import defaultdict, namedtuple
-import re
+from collections import namedtuple
+from sqlalchemy import and_, or_
 import inspect
+from querystring_parser import parser
+from flask import request
+import views
+
+
+def get_resource(Resource, Table, Session, basepath="/"):
+    """ Return a flask-restful datatables resource for SQLAlchemy
+
+        This function returns a class subclassed from Flask-Restless Resource
+        that is set up for GET only restful requests prepared for datatables
+        and enhanced with Flask-Restless filtering
+
+        Use this function inside your flask-restful app to create
+        datatables endpoints for your SA tables
+
+        ARGS:
+            Resource    (class):    Flask-Restful Resource
+            Table       (class):    SA Table class
+            Session     (inst):     SA Session instance
+            basepath    (str):      Base path to put endpoint
+
+        EXAMPLE:
+            Assuming you already have your SA Session object as Session
+
+            app = Flask(__name__)
+            api = Api(app)
+            resource, path, endpoint = get_resource(Resource, tableObj, Session, basepath="/")
+            api.add_resource(resource, path, endpoint=endpoint)
+
+        
+    """
+    class TmpResource(Resource):
+        def get(self):
+            # parse the url args into a dict
+            parsed = parser.parse(request.query_string)
+
+            # column names for this table
+            dtcols = get_columns(Table, parsed)
+            #for col in dtcols:
+            #    print col
+
+            # pre build the query so we can add filters to it here
+            query = Session.query(Table)
+
+            # check if mark is filtering the rows by a username or whatever
+            if 'q' in parsed.keys():
+                query = views.search(Session, Table, parsed)
+                #query = search.search(Session, Table, query, parsed['q'])
+
+            # get our DataTable object
+            dtobj = DataTable( parsed, Table, query, dtcols)
+            # return the query result in json
+
+            return dtobj.json()
+    # return stuff that can be passed to api.add_resource
+    return (TmpResource, '%s%s' % (basepath,Table.__tablename__), '%s%s' % (basepath,Table.__tablename__))
+
+
+
+def get_columns(Table, parsed):
+    """
+        Helper function that just builds the tuples datatables needs for the columns
+    """
+    # column names for this table
+    dtcols = []
+    # put them in, it's just a list of (col_name, col_name)
+    for col in parsed['columns'].values():
+        col = col['data']
+        colname = col
+        if col:
+            if '__' in col:
+                col = col.replace('__', '.')
+            dtcols.append((colname, col, lambda i: "{}".format(i)))
+    return dtcols
+
 
 
 BOOLEAN_FIELDS = (
@@ -53,8 +128,16 @@ class DataTable(object):
                 self.columns.append(d)
             self.columns_dict[d.name] = d
 
+        # get only unique relationships to join
+        # fix for when there are multiple columns within the same joined table
+        # only eliminates warnings but still...
+        seencols = []
         for column in (col for col in self.columns if "." in col.model_name):
-            self.query = self.query.join(column.model_name.split(".")[0])
+            joincol = column.model_name.split(".")[0]
+            if joincol not in seencols:
+                self.query = self.query.join(joincol)
+                seencols.append(joincol)
+
 
     @staticmethod
     def coerce_value(key, value):
@@ -111,8 +194,20 @@ class DataTable(object):
         query = self.query
         total_records = query.count()
 
-        if callable(self.search_func) and search.get("value", None):
-            query = self.search_func(query, str(search["value"]))
+        if search.get("value", None):
+            # unicode that value we are going to page filter with
+            valuestr = '%%%s%%' % str(search["value"])
+
+            # this builds a list of .like() comparisons for the
+            # value passed and every column so it's a global search
+            orlist = []
+            for searchcol in self.columns:
+                model_column = self.get_column(searchcol)
+                orlist.append(model_column.like(unicode(valuestr)))
+
+            # modify the query then return it
+            query = query.filter(and_(or_(*orlist)))
+
 
         for order in ordering.values():
             direction, column = order["dir"], order["column"]
@@ -137,7 +232,7 @@ class DataTable(object):
         filtered_records = query.count()
         query = query.slice(start, start + length)
 
-        return {
+        retval = {
             "draw": draw,
             "recordsTotal": total_records,
             "recordsFiltered": filtered_records,
@@ -145,10 +240,12 @@ class DataTable(object):
                 self.output_instance(instance) for instance in query.all()
             ]
         }
+        #print retval
+        return retval
 
     def output_instance(self, instance):
         returner = {
-            key.name: self.get_value(key, instance) for key in self.columns
+            key.name.replace('.', '__'): self.get_value(key, instance) for key in self.columns
         }
 
         if self.data:
