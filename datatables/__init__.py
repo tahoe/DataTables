@@ -45,7 +45,8 @@ def get_resource(Resource, Table, Session, basepath="/"):
             # pre build the query so we can add filters to it here
             query = Session.query(Table)
 
-            # check if mark is filtering the rows by a username or whatever
+            # check if we are filtering the rows some how
+            # this uses the restless view code
             if 'q' in parsed.keys():
                 query = views.search(Session, Table, parsed)
                 #query = search.search(Session, Table, query, parsed['q'])
