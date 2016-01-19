@@ -49,7 +49,6 @@ def get_resource(Resource, Table, Session, basepath="/"):
             # this uses the restless view code
             if 'q' in parsed.keys():
                 query = views.search(Session, Table, parsed)
-                #query = search.search(Session, Table, query, parsed['q'])
 
             # get our DataTable object
             dtobj = DataTable( parsed, Table, query, dtcols)
@@ -80,7 +79,7 @@ def get_columns(Table, parsed):
 
 
 BOOLEAN_FIELDS = (
-    "search.regex", "searchable", "orderable", "regex"
+    "search.regex", "orderable", "regex"
 )
 
 
@@ -99,7 +98,6 @@ class DataTable(object):
         self.data = {}
         self.columns = []
         self.columns_dict = {}
-        self.search_func = lambda qs, s: qs
 
         for col in columns:
             name, model_name, filter_func = None, None, None
@@ -180,9 +178,6 @@ class DataTable(object):
 
         return model_column
 
-    def searchable(self, func):
-        self.search_func = func
-
     def _json(self):
         draw = self.get_integer_param("draw")
         start = self.get_integer_param("start")
@@ -195,6 +190,7 @@ class DataTable(object):
         query = self.query
         total_records = query.count()
 
+        # handle searches here rather than using the old searchable function
         if search.get("value", None):
             # unicode that value we are going to page filter with
             valuestr = '%%%s%%' % str(search["value"])
