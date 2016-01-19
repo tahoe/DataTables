@@ -1,31 +1,16 @@
-===============================================
-datatables |PyPi Version| |TravisCI| |Coverage|
-===============================================
-
-.. |PyPi Version| image:: http://img.shields.io/pypi/v/datatables.svg?style=flat
-    :target: https://pypi.python.org/pypi/datatables
-
-.. |TravisCI| image:: https://api.travis-ci.org/orf/datatables.svg
-    :target: https://travis-ci.org/orf/datatables
-
-.. |Coverage| image:: https://coveralls.io/repos/orf/datatables/badge.png?branch=master
-  :target: https://coveralls.io/r/orf/datatables?branch=master
-
-
-
-
 Installation
 ------------
 
-The package is available on `PyPI <https://pypi.python.org/pypi/datatables>`_ and is tested on Python 2.7 to 3.4
+The package is NOT available on PyPI and is tested on Python 2.7
 
 .. code-block:: bash
 
-    pip install datatables
+    python setup.py install
 
 Usage
 -----
 
+NEEDS EDIT
 Using Datatables is simple. Construct a DataTable instance by passing it your request parameters (or another dict-like
 object), your model class, a base query and a set of columns. The columns list can contain simple strings which are
 column names, or tuples containing (datatable_name, model_name), (datatable_name, model_name, filter_function) or
@@ -59,52 +44,21 @@ Example
         description = Column(Text, unique=True)
         user_id     = Column(Integer, ForeignKey('users.id'))
 
-**views.py**
+**api.py**
 
 .. code-block:: python
 
-    @view_config(route_name="data", request_method="GET", renderer="json")
-    def users_data(request):
-        # User.query = session.query(User)
-        table = DataTable(request.GET, User, User.query, [
-            "id",
-            ("name", "full_name", lambda i: "User: {}".format(i.full_name)),
-            ("address", "address.description"),
-        ])
-        table.add_data(link=lambda o: request.route_url("view_user", id=o.id))
-        table.searchable(lambda queryset, user_input: perform_some_search(queryset, user_input))
+    from model import Session, User, Address
+    from datatables import *
 
-        return table.json()
+    app = Flask(__name__)
+    api = Api(app)
+    # add User resource
+    resource, path, endpoint = get_resource(Resource, User, Session, basepath="/")
+    api.add_resource(resource, path, endpoint=endpoint)
 
-**template.jinja2**
+    # add Address resource
+    resource, path, endpoint = get_resource(Resource, Address, Session, basepath="/")
+    api.add_resource(resource, path, endpoint=endpoint)
 
-.. code-block:: html
 
-    <table class="table" id="clients_list">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>User name</th>
-                <th>Address</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-
-    <script>
-        $("#clients_list").dataTable({
-            serverSide: true,
-            processing: true,
-            ajax: "{{ request.route_url("data") }}",
-            columns: [
-                {
-                    data: "id",
-                    "render": function(data, type, row){
-                        return $("<div>").append($("<a/>").attr("href", row.DT_RowData.link).text(data)).html();
-                    }
-                },
-                { data: "name" },
-                { data: "address" }
-            ]
-    </script>
