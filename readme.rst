@@ -1,3 +1,6 @@
+====================
+bla
+====================
 Installation
 ------------
 
@@ -11,6 +14,7 @@ Usage
 -----
 
 NEEDS EDIT
+
 Using Datatables is simple. Construct a DataTable instance by passing it your request parameters (or another dict-like
 object), your model class, a base query and a set of columns. The columns list can contain simple strings which are
 column names, or tuples containing (datatable_name, model_name), (datatable_name, model_name, filter_function) or
