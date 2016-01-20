@@ -47,6 +47,8 @@ Example myclasses method on the MyBase class
             return mine
 
 
+Or you can just call MyBase.__subclasses() I guess
+
 
 
 Additional data such as hyperlinks can be added via DataTable.add_data, which accepts a callable that is called for
