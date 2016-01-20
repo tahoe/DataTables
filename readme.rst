@@ -24,6 +24,7 @@ If you write a function on your SA Base class that returns a list of child table
 something like this:
 
 .. code-block:: python
+
     for tableObj in MyBase.myclasses():
         # generate the Resource object that uses DataTable
         resource, path, endpoint = get_resource(Resource, tableObj, Session, basepath="/")
