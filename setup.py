@@ -31,7 +31,7 @@ setup(
     install_requires=[
         'querystring_parser',
         'sqlalchemy',
-        'Flask',
+        'flask',
         'flask-restful'
     ],
 )
