@@ -73,7 +73,7 @@ def get_columns(Table, parsed):
         if col:
             if '__' in col:
                 col = col.replace('__', '.')
-            dtcols.append((colname, col, lambda i: "{}".format(i)))
+            dtcols.append((colname, col, lambda i: u"{}".format(i)))
     return dtcols
 
 
