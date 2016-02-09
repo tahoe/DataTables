@@ -1,9 +1,12 @@
 from collections import namedtuple
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, desc, asc
+from sqlalchemy.orm import relation, backref, synonym, outerjoin, join, eagerload, relationship, validates
 import inspect
 from querystring_parser import parser
 from flask import request
 import views
+from libs.genfunctions.general import *
+import apihelpers as helpme
 
 
 def get_resource(Resource, Table, Session, basepath="/"):
@@ -99,6 +102,9 @@ class DataTable(object):
         self.columns = []
         self.columns_dict = {}
 
+        # set applicable log entry name
+        syslog.openlog('dtapi_dtapi')
+
         for col in columns:
             name, model_name, filter_func = None, None, None
 
@@ -132,11 +138,25 @@ class DataTable(object):
         # only eliminates warnings but still...
         seencols = []
         for column in (col for col in self.columns if "." in col.model_name):
-            joincol = column.model_name.split(".")[0]
-            if joincol not in seencols:
-                self.query = self.query.join(joincol)
-                seencols.append(joincol)
+            joincols = column.model_name.split(".")[:-1]
 
+            # join the first column, which is off of our class
+            if joincols[0] not in seencols:
+                seencols.append(joincols[0])
+                self.query = self.query.join(joincols[0], isouter=True)
+            curmodel = self.model
+            if len(joincols) > 1:
+                for i, joincol in enumerate(joincols):
+                    # we don't want to do this to the last item
+                    if i != len(joincols) -1:
+                        curmodel = helpme.get_related_model(curmodel, joincol)
+                        # we don't want to do this for columns we already did also
+                        if joincol not in seencols:
+                            seencols.append(joincol)
+                            #seencols.append(joincols[i+1])
+                            #self.query = self.query.join(curmodel, isouter=True)
+                        if joincols[i+1] not in seencols:
+                            self.query = self.query.join(getattr(curmodel, joincols[i+1]), isouter=True)
 
     @staticmethod
     def coerce_value(key, value):
@@ -171,8 +191,16 @@ class DataTable(object):
     def get_column(self, column):
         if "." in column.model_name:
             column_path = column.model_name.split(".")
-            relationship = getattr(self.model, column_path[0])
-            model_column = getattr(relationship.property.mapper.entity, column_path[1])
+
+            # get the column we are getting
+            column_name = column_path[-1]
+
+            # the path to the column
+            column_path = column_path[:-1]
+            curmodel = self.model
+            for column in column_path:
+                curmodel = helpme.get_related_model(curmodel, column)
+            model_column = getattr(curmodel, column_name)
         else:
             model_column = getattr(self.model, column.model_name)
 
@@ -224,7 +252,7 @@ class DataTable(object):
             if isinstance(model_column, property):
                 raise DataTablesError("Cannot order by column {} as it is a property".format(column.model_name))
 
-            query = query.order_by(model_column.desc() if direction == "desc" else model_column.asc())
+            query = query.order_by(desc(model_column) if direction == "desc" else asc(model_column))
 
         filtered_records = query.count()
         query = query.slice(start, start + length)
@@ -253,17 +281,27 @@ class DataTable(object):
         return returner
 
     def get_value(self, key, instance):
+        log_warning("get_value passed key: {}, instance: {}".format(key, instance))
         attr = key.model_name
         if "." in attr:
             tmp_list=attr.split(".")
             attr=tmp_list[-1]
+            log_warning("tmp_list is {}, attr is {}".format(tmp_list, attr))
             for sub in tmp_list[:-1]:
-                instance = getattr(instance, sub)
+                oldinstance = instance
+                try:
+                    instance = getattr(instance, sub)
+                except Exception:
+                    instance = oldinstance
+                    break
 
-        if key.filter is not None:
-            r = key.filter(getattr(instance, attr))
+        if instance:
+            if key.filter is not None:
+                r = key.filter(getattr(instance, attr))
+            else:
+                r = getattr(instance, attr)
         else:
-            r = getattr(instance, attr)
+            r = ""
 
         return r() if inspect.isroutine(r) else r
 

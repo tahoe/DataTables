@@ -6,7 +6,7 @@ desc = open("readme.rst").read() if os.path.isfile("readme.rst") else ""
 
 setup(
     name='datatables',
-    version='0.5.0',
+    version='0.6.0',
     packages=['datatables'],
     url='https://github.com/tahoe/datatables/',
     license='MIT',
