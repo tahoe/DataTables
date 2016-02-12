@@ -11,7 +11,7 @@ setup(
     url='https://github.com/tahoe/datatables/',
     license='MIT',
     long_description=desc,
-    keywords='sqlalchemy datatables jquery flask flask-restless flask-restful',
+    keywords='sqlalchemy datatables jquery flask-restless flask-restful',
     author='Dennis',
     author_email='djdtahoe@gmail.com',
     description='Integrates SQLAlchemy with DataTables (framework Flask)',
