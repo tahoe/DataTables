@@ -1,3 +1,6 @@
+flask
+flask-restful
+querystring_parser
 sqlalchemy
 sqlalchemy_utils
 fake-factory
