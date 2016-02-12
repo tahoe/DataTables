@@ -6,10 +6,6 @@ from sqlalchemy.orm import relationship, sessionmaker
 
 Base = declarative_base()
 
-engine = create_engine('sqlite://', echo=True)
-Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
-
 
 class User(Base):
     __tablename__ = 'users'

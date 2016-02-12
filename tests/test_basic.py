@@ -3,15 +3,15 @@ from sqlalchemy.orm import sessionmaker
 import faker
 from querystring_parser import parser
 
-from .models import User, Address, Session
+from .models import *
 from datatables import DataTable
 
 
 class TestDataTables:
     def setup_method(self, method):
-        #engine = create_engine('sqlite://', echo=True)
-        #Base.metadata.create_all(engine)
-        #Session = sessionmaker(bind=engine)
+        engine = create_engine('sqlite:///testdb.db', echo=True)
+        Base.metadata.create_all(engine)
+        Session = sessionmaker(bind=engine)
 
         self.session = Session()
 

@@ -101,9 +101,6 @@ class DataTable(object):
         self.columns = []
         self.columns_dict = {}
 
-        # set applicable log entry name
-        syslog.openlog('dtapi_dtapi')
-
         for col in columns:
             name, model_name, filter_func = None, None, None
 
