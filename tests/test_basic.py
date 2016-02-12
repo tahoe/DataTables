@@ -1,16 +1,17 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import faker
+from querystring_parser import parser
 
-from .models import User, Address, Base
-from datatables import DataTable, DataColumn
+from .models import User, Address, Session
+from datatables import DataTable
 
 
 class TestDataTables:
     def setup_method(self, method):
-        engine = create_engine('sqlite://', echo=True)
-        Base.metadata.create_all(engine)
-        Session = sessionmaker(bind=engine)
+        #engine = create_engine('sqlite://', echo=True)
+        #Base.metadata.create_all(engine)
+        #Session = sessionmaker(bind=engine)
 
         self.session = Session()
 
@@ -59,7 +60,13 @@ class TestDataTables:
             for key, value in search.items():
                 x["search[{}]".format(key)] = str(value)
 
-        return x
+        # this mimics an actual request
+        y = "?{}={}&".format('draw', x['draw'])
+        y += "&".join("{}={}".format(k, v) for k, v in x.items() if k != 'draw')
+
+        # use parser to parse the request into a dict we can use in DataTable
+        return parser.parse(y)
+
 
     def test_basic_function(self):
         self.make_data(10)
