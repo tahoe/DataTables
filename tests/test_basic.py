@@ -68,9 +68,7 @@ class TestDataTables:
         y = "{}={}&".format('draw', x['draw'])
         y += "&".join("{}={}".format(k, v) for k, v in x.items() if k != 'draw')
 
-        print y
         y = parser.parse(y)
-        print y
 
         # use parser to parse the request into a dict we can use in DataTable
         return y
@@ -80,7 +78,6 @@ class TestDataTables:
         self.make_data(10)
 
         req = self.make_params()
-        print req
 
         table = DataTable(req, User, self.session.query(User), [
             "id",
