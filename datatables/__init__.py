@@ -125,7 +125,7 @@ class DataTable(object):
             else:
                 # It's just a string
                 name, model_name = col, col
-                d = DataColumn(name=name, model_name=model_name)
+                d = DataColumn(name=name, model_name=model_name, filter=filter_func)
                 self.columns.append(d)
             self.columns_dict[d.name] = d
 

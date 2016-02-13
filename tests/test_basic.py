@@ -47,7 +47,6 @@ class TestDataTables:
             b = "columns[{}]".format(i)
             x[b + "[data]"] = item
             x[b + "[name]"] = ""
-            x[b + "[searchable]"] = "true"
             x[b + "[orderable]"] = "true"
             x[b + "[search][value]"] = ""
             x[b + "[search][regex]"] = "false"
@@ -223,7 +222,6 @@ class TestDataTables:
         })
 
         table = DataTable(req, User, self.session.query(User), [("name", "full_name")])
-        table.searchable(lambda qs, sq: qs.filter(User.full_name.startswith(sq)))
         results = table.json()
         assert len(results["data"]) == 1
 
