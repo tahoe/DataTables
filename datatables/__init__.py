@@ -4,8 +4,8 @@ from sqlalchemy.orm import relation, backref, synonym, outerjoin, join, eagerloa
 import inspect
 from querystring_parser import parser
 from flask import request
-import views
 import apihelpers as helpme
+import views
 
 
 def get_resource(Resource, Table, Session, basepath="/"):
