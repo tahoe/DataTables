@@ -59,8 +59,8 @@ from apihelpers import strings_to_dates
 from apihelpers import to_dict
 from apihelpers import upper_keys
 from apihelpers import get_related_association_proxy_model
-from search import create_query
-from search import search as qsearch
+from .search import create_query
+from .search import search as qsearch
 
 
 
