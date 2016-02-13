@@ -21,5 +21,5 @@ class Address(Base):
     __tablename__ = 'addresses'
 
     id = Column(Integer, primary_key=True)
-    description = Column(Text, unique=True)
+    description = Column(Text)
     user_id = Column(Integer, ForeignKey('users.id'))
