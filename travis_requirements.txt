@@ -5,5 +5,5 @@ sqlalchemy
 coverage==3.7.1
 sqlalchemy_utils
 pytest
-faker-factory
+fake-factory
 coveralls
