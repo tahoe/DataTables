@@ -1,3 +1,7 @@
+language: python
+python:
+  - "2.7"
+  - "3.3"
 flask
 flask-restful
 querystring_parser
