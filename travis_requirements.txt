@@ -4,6 +4,6 @@ querystring_parser
 sqlalchemy
 coverage==3.7.1
 sqlalchemy_utils
-fake
+faker
 pytest
 coveralls
