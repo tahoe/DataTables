@@ -79,11 +79,11 @@ class TestDataTables:
 
         req = self.make_params()
 
-        table = DataTable(req, User, self.session.query(User), [
-            "id",
-            ("name", "full_name"),
-            ("address", "address.description"),
-        ])
+        table = DataTable(req, User, self.session.query(User))#, [
+        #    "id",
+        #    ("name", "full_name"),
+        #    ("address", "address.description"),
+        #])
 
         x = table.json()
 
@@ -99,24 +99,14 @@ class TestDataTables:
         req = self.make_params(order=[{"column": 2, "dir": "desc"}])
         table = DataTable(req,
                           User,
-                          self.session.query(User),
-                          [
-                              "id",
-                              ("name", "full_name"),
-                              ("address", "address.description")
-                          ])
+                          self.session.query(User))
         result = table.json()
         assert result["data"][0]["address"] == addr_desc.description
 
         req = self.make_params(order=[{"column": 2, "dir": "asc"}])
         table = DataTable(req,
                           User,
-                          self.session.query(User),
-                          [
-                              "id",
-                              ("name", "full_name"),
-                              ("address", "address.description")
-                          ])
+                          self.session.query(User))
         result = table.json()
         assert result["data"][0]["address"] == addr_asc.description
 
