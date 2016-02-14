@@ -41,8 +41,6 @@ class TestDataTables:
             "draw": "1",
             "search[value]": "",
             "search[regex]": "false",
-            "order[0][column]": "1",
-            "order[0][dir]": "asc",
             "start": str(start),
             "length": str(length)
         }
@@ -56,13 +54,18 @@ class TestDataTables:
             x[b + "[search][value]"] = ""
             x[b + "[search][regex]"] = "false"
 
-        for i, item in enumerate(order or []):
-            for key, value in item.items():
-                x["order[{}][{}]".format(i, key)] = str(value)
+        if order:
+            for i, item in enumerate(order or []):
+                for key, value in item.items():
+                    x["order[{}][{}]".format(i, key)] = str(value)
+        else:
+            x["order[0][column]"] = "1"
+            x["order[0][dir]"] = "asc"
 
         if search:
             for key, value in search.items():
                 x["search[{}]".format(key)] = str(value)
+        print x
 
         # this mimics an actual request
         y = "{}={}&".format('draw', x['draw'])
@@ -77,11 +80,7 @@ class TestDataTables:
 
         req = self.make_params()
 
-        table = DataTable(req, User, self.session)#.query(User))#, [
-        #    "id",
-        #    ("name", "name"),
-        #    ("address", "address.description"),
-        #])
+        table = DataTable(req, User, self.session)
 
         x = table.json()
 
@@ -95,16 +94,12 @@ class TestDataTables:
         self.session.commit()
 
         req = self.make_params(order=[{"column": 2, "dir": "desc"}])
-        table = DataTable(req,
-                          User,
-                          self.session)
+        table = DataTable(req, User, self.session)
         result = table.json()
         assert result["data"][0]["address"] == addr_desc.description
 
         req = self.make_params(order=[{"column": 2, "dir": "asc"}])
-        table = DataTable(req,
-                          User,
-                          self.session)
+        table = DataTable(req, User, self.session)
         result = table.json()
         assert result["data"][0]["address"] == addr_asc.description
 
