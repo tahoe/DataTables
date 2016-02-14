@@ -36,24 +36,8 @@ def get_resource(Resource, Table, Session, basepath="/"):
     """
     class TmpResource(Resource):
         def get(self):
-            # parse the url args into a dict
-            parsed = parser.parse(request.query_string)
-
-            # column names for this table
-            dtcols = get_columns(Table, parsed)
-            #for col in dtcols:
-            #    print col
-
-            # pre build the query so we can add filters to it here
-            query = Session.query(Table)
-
-            # check if we are filtering the rows some how
-            # this uses the restless view code
-            if 'q' in parsed.keys():
-                query = views.search(Session, Table, parsed)
-
             # get our DataTable object
-            dtobj = DataTable( parsed, Table, query, dtcols)
+            dtobj = DataTable( request.query_string, Table, Session)
             # return the query result in json
 
             return dtobj.json()
@@ -93,13 +77,28 @@ class DataTablesError(ValueError):
 
 
 class DataTable(object):
-    def __init__(self, params, model, query, columns):
-        self.params = params
+    def __init__(self, qstring, model, session):
         self.model = model
-        self.query = query
         self.data = {}
         self.columns = []
         self.columns_dict = {}
+
+        # parse the url args into a dict
+        parsed = parser.parse(qstring)
+        self.params = parsed
+
+        # column names for this table
+        columns = get_columns(model, parsed)
+        #for col in dtcols:
+        #    print col
+
+        # check if we are filtering the rows some how
+        # this uses the restless view code
+        if 'q' in parsed.keys():
+            self.query = views.search(session, model, parsed)
+        else:
+            # pre build the query so we can add filters to it here
+            self.query = session.query(model)
 
         for col in columns:
             name, model_name, filter_func = None, None, None
