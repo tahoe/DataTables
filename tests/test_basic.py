@@ -68,8 +68,6 @@ class TestDataTables:
         y = "{}={}&".format('draw', x['draw'])
         y += "&".join("{}={}".format(k, v) for k, v in x.items() if k != 'draw')
 
-        y = parser.parse(y)
-
         # use parser to parse the request into a dict we can use in DataTable
         return y
 
