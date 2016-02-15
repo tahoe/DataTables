@@ -42,25 +42,25 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.query import Query
 from werkzeug.urls import url_quote_plus
 
-from datatables.views.apihelpers import count
-from datatables.views.apihelpers import evaluate_functions
-from datatables.views.apihelpers import get_by
-from datatables.views.apihelpers import get_columns
-from datatables.views.apihelpers import get_or_create
-from datatables.views.apihelpers import get_related_model
-from datatables.views.apihelpers import get_relations
-from datatables.views.apihelpers import has_field
-from datatables.views.apihelpers import is_like_list
-from datatables.views.apihelpers import partition
-from datatables.views.apihelpers import primary_key_name
-from datatables.views.apihelpers import query_by_primary_key
-from datatables.views.apihelpers import session_query
-from datatables.views.apihelpers import strings_to_dates
-from datatables.views.apihelpers import to_dict
-from datatables.views.apihelpers import upper_keys
-from datatables.views.apihelpers import get_related_association_proxy_model
-from datatables.views.search import create_query
-from datatables.views.search import search as qsearch
+from flask_datatables.views.apihelpers import count
+from flask_datatables.views.apihelpers import evaluate_functions
+from flask_datatables.views.apihelpers import get_by
+from flask_datatables.views.apihelpers import get_columns
+from flask_datatables.views.apihelpers import get_or_create
+from flask_datatables.views.apihelpers import get_related_model
+from flask_datatables.views.apihelpers import get_relations
+from flask_datatables.views.apihelpers import has_field
+from flask_datatables.views.apihelpers import is_like_list
+from flask_datatables.views.apihelpers import partition
+from flask_datatables.views.apihelpers import primary_key_name
+from flask_datatables.views.apihelpers import query_by_primary_key
+from flask_datatables.views.apihelpers import session_query
+from flask_datatables.views.apihelpers import strings_to_dates
+from flask_datatables.views.apihelpers import to_dict
+from flask_datatables.views.apihelpers import upper_keys
+from flask_datatables.views.apihelpers import get_related_association_proxy_model
+from flask_datatables.views.search import create_query
+from flask_datatables.views.search import search as qsearch
 
 
 

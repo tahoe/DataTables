@@ -4,8 +4,8 @@ from sqlalchemy.orm import relation, backref, synonym, outerjoin, join, eagerloa
 import inspect
 from querystring_parser import parser
 from flask import request
-from datatables import views
-from datatables.views import apihelpers as helpme
+from flask_datatables import views
+from flask_datatables.views import apihelpers as helpme
 import sys
 
 if sys.version_info.major == 3:

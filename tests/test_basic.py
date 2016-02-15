@@ -4,7 +4,7 @@ import faker
 from querystring_parser import parser
 import json
 from .models import *
-from datatables import *
+from flask_datatables import *
 import os
 
 

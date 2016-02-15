@@ -22,10 +22,10 @@ from sqlalchemy import or_
 from sqlalchemy.ext.associationproxy import AssociationProxy
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
-from datatables.views.apihelpers import session_query
-from datatables.views.apihelpers import get_related_association_proxy_model
-from datatables.views.apihelpers import primary_key_names
-from datatables.views.apihelpers import get_related_model
+from flask_datatables.views.apihelpers import session_query
+from flask_datatables.views.apihelpers import get_related_association_proxy_model
+from flask_datatables.views.apihelpers import primary_key_names
+from flask_datatables.views.apihelpers import get_related_model
 
 debug = False
 
