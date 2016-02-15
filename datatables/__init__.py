@@ -215,7 +215,6 @@ class DataTable(object):
 
         # handle searches here rather than using the old searchable function
         if search.get("value", None):
-            # unicode that value we are going to page filter with
             valuestr = '%%%s%%' % str(search["value"])
 
             # this builds a list of .like() comparisons for the
@@ -223,7 +222,7 @@ class DataTable(object):
             orlist = []
             for searchcol in self.columns:
                 model_column = self.get_column(searchcol)
-                orlist.append(model_column.like(unicode(valuestr)))
+                orlist.append(model_column.like(valuestr))
 
             # modify the query then return it
             query = query.filter(and_(or_(*orlist)))
