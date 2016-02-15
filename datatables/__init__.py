@@ -5,10 +5,7 @@ import inspect
 from querystring_parser import parser
 from flask import request
 import views
-from libs.genfunctions.general import *
 import apihelpers as helpme
-
-debug=False
 
 def get_resource(Resource, Table, Session, basepath="/"):
     """ Return a flask-restful datatables resource for SQLAlchemy
@@ -103,9 +100,6 @@ class DataTable(object):
         self.columns = []
         self.columns_dict = {}
 
-        # set applicable log entry name
-        syslog.openlog('dtapi_dtapi')
-
         for col in columns:
             name, model_name, filter_func = None, None, None
 
@@ -140,19 +134,14 @@ class DataTable(object):
         seencols = []
         for column in (col for col in self.columns if "." in col.model_name):
             joincols = column.model_name.split(".")[:-1]
-            writedebug(debug, "1...In INIT Section: joincols is: {}".format(joincols))
-            writedebug(debug, "2...In INIT Section: model_name is: {}".format(column.model_name))
 
             # join the first column, which is off of our class
             if joincols[0] not in seencols:
                 seencols.append(joincols[0])
-                writedebug(debug, "3...outside loop seencols: {}".format(seencols))
                 self.query = self.query.join(joincols[0], isouter=True)
-                writedebug(debug, "4...joining {}".format(joincols[0]))
             curmodel = self.model
             if len(joincols) > 1:
                 for i, joincol in enumerate(joincols):
-                    writedebug(debug, "5...curmodel {}".format(curmodel))
                     # we don't want to do this to the last item
                     if i != len(joincols) -1:
                         curmodel = helpme.get_related_model(curmodel, joincol)
@@ -160,14 +149,9 @@ class DataTable(object):
                         if joincol not in seencols:
                             seencols.append(joincol)
                             #seencols.append(joincols[i+1])
-                            writedebug(debug, "6...inside loop seencols: {}".format(seencols))
-                            writedebug(debug, "7...joining {}".format(joincol))
                             #self.query = self.query.join(curmodel, isouter=True)
                         if joincols[i+1] not in seencols:
-                            writedebug(debug, "8...inside loop seencols: {}".format(seencols))
-                            writedebug(debug, "9...joining {}".format(joincols[i+1]))
                             self.query = self.query.join(getattr(curmodel, joincols[i+1]), isouter=True)
-                    #writedebug(debug, str(self.query))
 
     @staticmethod
     def coerce_value(key, value):
@@ -200,7 +184,6 @@ class DataTable(object):
             }
 
     def get_column(self, column):
-        writedebug(debug, "get_column passed column: {}".format(column))
         if "." in column.model_name:
             column_path = column.model_name.split(".")
 
@@ -209,7 +192,6 @@ class DataTable(object):
 
             # the path to the column
             column_path = column_path[:-1]
-            writedebug(debug, "get_column column_path is: {}".format(column_path))
             curmodel = self.model
             for column in column_path:
                 curmodel = helpme.get_related_model(curmodel, column)
@@ -240,19 +222,15 @@ class DataTable(object):
             # value passed and every column so it's a global search
             orlist = []
             for searchcol in self.columns:
-                writedebug(debug, "In search section: searchcol is: {}".format(searchcol))
                 model_column = self.get_column(searchcol)
-                writedebug(debug, "In search section: model_column is: {}".format(model_column))
                 orlist.append(model_column.like(unicode(valuestr)))
 
             # modify the query then return it
             query = query.filter(and_(or_(*orlist)))
-            writedebug(debug, "In search section: query is: {}".format(str(query)))
 
 
         for order in ordering.values():
             direction, column = order["dir"], order["column"]
-            writedebug(debug, "In ordering section: direction: {}, column: {}".format(str(direction), str(column)))
             column = int(column)
 
             if column not in columns:
@@ -265,13 +243,11 @@ class DataTable(object):
             column = self.columns_dict[column_name]
 
             model_column = self.get_column(column)
-            writedebug(debug, "In ordering section: column_name: {}, column: {}".format(str(column_name), str(column)))
 
             if isinstance(model_column, property):
                 raise DataTablesError("Cannot order by column {} as it is a property".format(column.model_name))
 
             query = query.order_by(desc(model_column) if direction == "desc" else asc(model_column))
-            writedebug(debug, "In ordering section: query is: {}".format(str(query)))
 
         filtered_records = query.count()
         query = query.slice(start, start + length)
