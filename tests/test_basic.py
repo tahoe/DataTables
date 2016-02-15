@@ -159,6 +159,7 @@ class TestDataTables:
         # get result
         result = table.json()
         assert result["data"][0]["address"] == addr_a.description
+        assert len(result["data"]) == 1
 
         # same for b
         urlfilter = json.dumps({"filters":[{"name": "address__description", "op": "has", "val": "b"}]})
@@ -173,6 +174,7 @@ class TestDataTables:
             ])
         result = table.json()
         assert result["data"][0]["address"] == addr_b.description
+        assert len(result["data"]) == 1
 
 
     def test_error(self):
