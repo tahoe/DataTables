@@ -5,7 +5,7 @@ import inspect
 from querystring_parser import parser
 from flask import request
 import views
-import apihelpers as helpme
+from views import apihelpers as helpme
 
 def get_resource(Resource, Table, Session, basepath="/"):
     """ Return a flask-restful datatables resource for SQLAlchemy

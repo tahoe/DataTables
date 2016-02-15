@@ -96,11 +96,10 @@ class TestDataTables:
         assert len(x["data"]) == 10
 
     def test_relation_ordering(self):
-        if not self.session.query(User).filter(User.full_name==u'SomeUser').first():
-            u1, addr_asc = self.make_user("SomeUser", "0" * 15)
-            u2, addr_desc = self.make_user("SomeOtherUser", "z" * 15)
-            self.session.add_all((u1, u2))
-            self.session.commit()
+        u1, addr_asc = self.make_user("SomeUser", "0" * 15)
+        u2, addr_desc = self.make_user("SomeOtherUser", "z" * 15)
+        self.session.add_all((u1, u2))
+        self.session.commit()
 
         req = self.make_params(order=[{"column": 2, "dir": "desc"}])
         table = DataTable(req,
@@ -132,11 +131,10 @@ class TestDataTables:
             Look at filtering in flask-restless documentation for more
             filter options
         """
-        if not self.session.query(User).filter(User.full_name==u'userOne').first():
-            u1, addr_a = self.make_user("userOne", "a")
-            u2, addr_b = self.make_user("userTwo", "b")
-            self.session.add_all((u1, u2))
-            self.session.commit()
+        u1, addr_a = self.make_user("userOne", "a")
+        u2, addr_b = self.make_user("userTwo", "b")
+        self.session.add_all((u1, u2))
+        self.session.commit()
 
         # create a filter (flask-restless style, key will be 'q', set in the make_params function
         urlfilter = json.dumps({"filters":[{"name": "address__description", "op": "has", "val": "a"}]})
@@ -202,11 +200,10 @@ class TestDataTables:
             method from flask-restless that I have incorporated which
             provides much more flexibility in searching deep relations
         """
-        if not self.session.query(User).filter(User.full_name==u'Silly Sally').first():
-            user, addr = self.make_user("Silly Sally", "Silly Sally Road")
-            user2, addr2 = self.make_user("Silly Billy", "Silly Billy Road")
-            self.session.add_all((user, user2))
-            self.session.commit()
+        user, addr = self.make_user("Silly Sally", "Silly Sally Road")
+        user2, addr2 = self.make_user("Silly Billy", "Silly Billy Road")
+        self.session.add_all((user, user2))
+        self.session.commit()
 
         req = self.make_params(search={
             "value": "Silly Sally"
