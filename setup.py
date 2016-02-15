@@ -9,7 +9,7 @@ setup(
     version='0.6.0',
     packages=['flask_datatables'],
     url='https://github.com/tahoe/flask_datatables/',
-    download_url='https://github.com/tahoe/flask_datatables/archive/master.zip',
+    download_url='https://github.com/tahoe/flask_datatables/tarball/0.6.0',
     license='MIT',
     long_description=desc,
     keywords='sqlalchemy datatables jquery flask-restless flask-restful',
