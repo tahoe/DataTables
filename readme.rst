@@ -15,12 +15,12 @@ filterable AND orderable with just "vlan__switch__rack__location__name"
 Installation
 ------------
 
-The package is NOT available on PyPI BUT is passing tests on Python 2.7, 3.3 and 3.4
+The package is available on PyPI and is passing tests on Python 2.7, 3.3 and 3.4
 Working on getting this on PyPI
 
 .. code-block:: bash
 
-    python setup.py install
+    pip install flask_datatables
 
 Usage
 -----
