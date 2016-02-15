@@ -191,7 +191,7 @@ class TestDataTables:
 
     def test_search(self):
         user, addr = self.make_user("Silly Sally", "Silly Sally Road")
-        user2, addr2 = self.make_user("Silly Sall", "Silly Sally Roa")
+        user2, addr2 = self.make_user("Silly Billy", "Silly Billy Road")
         self.session.add_all((user, user2))
         self.session.commit()
 
@@ -204,7 +204,7 @@ class TestDataTables:
         assert len(results["data"]) == 1
 
         req = self.make_params(search={
-            "value": "Silly Sall"
+            "value": "Silly"
         })
 
         table = DataTable(req, User, self.session.query(User), [("name", "full_name")])

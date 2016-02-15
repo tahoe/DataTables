@@ -3,7 +3,7 @@
 __pycache__/
 tests/__pycache__/
 *.py[cod]
-
+testdb.db
 # C extensions
 *.so
 
