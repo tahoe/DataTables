@@ -16,7 +16,8 @@ class TestDataTables:
         self.session = Session()
 
         # initialize DB with 10 fake items
-        self.make_data(10)
+        if not self.session.query(User).all():
+            self.make_data(10)
 
     def make_data(self, user_count):
         f = faker.Faker()
@@ -85,8 +86,6 @@ class TestDataTables:
 
 
     def test_basic_function(self):
-        self.make_data(10)
-
         req = self.make_params()
 
         table = DataTable(req, User, self.session.query(User), [
@@ -100,10 +99,11 @@ class TestDataTables:
         assert len(x["data"]) == 10
 
     def test_relation_ordering(self):
-        u1, addr_asc = self.make_user("SomeUser", "0" * 15)
-        u2, addr_desc = self.make_user("SomeOtherUser", "z" * 15)
-        self.session.add_all((u1, u2))
-        self.session.commit()
+        if not self.session.query(User).filter(User.full_name==u'SomeUser').first():
+            u1, addr_asc = self.make_user("SomeUser", "0" * 15)
+            u2, addr_desc = self.make_user("SomeOtherUser", "z" * 15)
+            self.session.add_all((u1, u2))
+            self.session.commit()
 
         req = self.make_params(order=[{"column": 2, "dir": "desc"}])
         table = DataTable(req,
@@ -135,10 +135,11 @@ class TestDataTables:
             Look at filtering in flask-restless documentation for more
             filter options
         """
-        u1, addr_a = self.make_user("userOne", "a")
-        u2, addr_b = self.make_user("userTwo", "b")
-        self.session.add_all((u1, u2))
-        self.session.commit()
+        if not self.session.query(User).filter(User.full_name==u'userOne').first():
+            u1, addr_a = self.make_user("userOne", "a")
+            u2, addr_b = self.make_user("userTwo", "b")
+            self.session.add_all((u1, u2))
+            self.session.commit()
 
         # create a filter (flask-restless style, key will be 'q', set in the make_params function
         urlfilter = json.dumps({"filters":[{"name": "address__description", "op": "has", "val": "a"}]})
@@ -204,10 +205,11 @@ class TestDataTables:
             method from flask-restless that I have incorporated which
             provides much more flexibility in searching deep relations
         """
-        user, addr = self.make_user("Silly Sally", "Silly Sally Road")
-        user2, addr2 = self.make_user("Silly Billy", "Silly Billy Road")
-        self.session.add_all((user, user2))
-        self.session.commit()
+        if not self.session.query(User).filter(User.full_name==u'Silly Sally').first():
+            user, addr = self.make_user("Silly Sally", "Silly Sally Road")
+            user2, addr2 = self.make_user("Silly Billy", "Silly Billy Road")
+            self.session.add_all((user, user2))
+            self.session.commit()
 
         req = self.make_params(search={
             "value": "Silly Sally"
