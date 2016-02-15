@@ -2,9 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import faker
 from querystring_parser import parser
-
+import json
 from .models import *
-from datatables import DataTable
+from datatables import *
 
 
 class TestDataTables:
@@ -31,12 +31,12 @@ class TestDataTables:
         addr.description = address
 
         u = User()
-        u.name = name
+        u.full_name = name
         u.address = addr
 
         return u, addr
 
-    def make_params(self, order=None, search=None, start=0, length=10):
+    def make_params(self, order=None, search=None, start=0, length=10, urlfilter=None):
         x = {
             "draw": "1",
             "search[value]": "",
@@ -66,10 +66,16 @@ class TestDataTables:
         print x
 
         # this mimics an actual request
-        y = "{}={}&".format('draw', x['draw'])
+        y = ""
+        if urlfilter:
+            y += "q={}&".format(urlfilter)
+        y += "{}={}&".format('draw', x['draw'])
         y += "&".join("{}={}".format(k, v) for k, v in x.items() if k != 'draw')
 
+
+        print y
         y = parser.parse(y)
+        print y
 
         # use parser to parse the request into a dict we can use in DataTable
         return y
@@ -120,6 +126,47 @@ class TestDataTables:
                           ])
         result = table.json()
         assert result["data"][0]["address"] == addr_asc.description
+
+    def test_relation_urlfilter(self):
+        u1, addr_a = self.make_user("userOne", "a")
+        u2, addr_b = self.make_user("userTwo", "b")
+        self.session.add_all((u1, u2))
+        self.session.commit()
+
+        # create a filter (flask-restless style, key will be 'q', set in the make_params function
+        urlfilter = json.dumps({"filters":[{"name": "address__description", "op": "has", "val": "a"}]})
+
+        # this is a fake request as we pretend to have gotten from datatables js
+        req = self.make_params(urlfilter=urlfilter)
+
+        # if q is in the request.keys() we do the resltess filtering on the query
+        if 'q' in req.keys():
+            query = views.search(self.session, User, req)
+
+        # build the datatable with the query
+        table = DataTable(req, User, query, [
+            "id",
+            ("name", "full_name"),
+            ("address", "address.description")
+            ])
+
+        # get result
+        result = table.json()
+        assert result["data"][0]["address"] == addr_a.description
+
+        # same for b
+        urlfilter = json.dumps({"filters":[{"name": "address__description", "op": "has", "val": "b"}]})
+        req = self.make_params(urlfilter=urlfilter)
+        if 'q' in req.keys():
+            query = views.search(self.session, User, req)
+
+        table = DataTable(req, User, query, [
+            "id",
+            ("name", "full_name"),
+            ("address", "address.description")
+            ])
+        result = table.json()
+        assert result["data"][0]["address"] == addr_b.description
 
 """
     def test_filter(self):
