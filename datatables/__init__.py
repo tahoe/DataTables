@@ -6,6 +6,10 @@ from querystring_parser import parser
 from flask import request
 from datatables import views
 from datatables.views import apihelpers as helpme
+import sys
+
+if sys.version_info.major == 3:
+    import str as unicode
 
 def get_resource(Resource, Table, Session, basepath="/"):
     """ Return a flask-restful datatables resource for SQLAlchemy
@@ -222,7 +226,7 @@ class DataTable(object):
             orlist = []
             for searchcol in self.columns:
                 model_column = self.get_column(searchcol)
-                orlist.append(model_column.like(valuestr))
+                orlist.append(model_column.like(unicode(valuestr)))
 
             # modify the query then return it
             query = query.filter(and_(or_(*orlist)))
