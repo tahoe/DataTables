@@ -4,8 +4,8 @@ from sqlalchemy.orm import relation, backref, synonym, outerjoin, join, eagerloa
 import inspect
 from querystring_parser import parser
 from flask import request
-import views
-from views import apihelpers as helpme
+from datatables import views
+from datatables.views import apihelpers as helpme
 
 def get_resource(Resource, Table, Session, basepath="/"):
     """ Return a flask-restful datatables resource for SQLAlchemy

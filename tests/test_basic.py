@@ -5,10 +5,13 @@ from querystring_parser import parser
 import json
 from .models import *
 from datatables import *
+import os
 
 
 class TestDataTables:
     def setup_method(self, method):
+        if os.path.isfile('testdb.db'):
+            os.unlink('testdb.db')
         engine = create_engine('sqlite:///testdb.db', echo=True)
         Base.metadata.create_all(engine)
         Session = sessionmaker(bind=engine)
