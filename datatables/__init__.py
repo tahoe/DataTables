@@ -9,7 +9,7 @@ from datatables.views import apihelpers as helpme
 import sys
 
 if sys.version_info.major == 3:
-    import str as unicode
+    unicode = str
 
 def get_resource(Resource, Table, Session, basepath="/"):
     """ Return a flask-restful datatables resource for SQLAlchemy
