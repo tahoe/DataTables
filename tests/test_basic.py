@@ -15,6 +15,9 @@ class TestDataTables:
 
         self.session = Session()
 
+        # initialize DB with 10 fake items
+        self.make_data(10)
+
     def make_data(self, user_count):
         f = faker.Faker()
         users = []
@@ -97,7 +100,6 @@ class TestDataTables:
         assert len(x["data"]) == 10
 
     def test_relation_ordering(self):
-        self.make_data(10)
         u1, addr_asc = self.make_user("SomeUser", "0" * 15)
         u2, addr_desc = self.make_user("SomeOtherUser", "z" * 15)
         self.session.add_all((u1, u2))
@@ -128,6 +130,11 @@ class TestDataTables:
         assert result["data"][0]["address"] == addr_asc.description
 
     def test_relation_urlfilter(self):
+        """ This tests the flask-restless integrated filtering
+            In this test case we are filtering on a relationship.
+            Look at filtering in flask-restless documentation for more
+            filter options
+        """
         u1, addr_a = self.make_user("userOne", "a")
         u2, addr_b = self.make_user("userTwo", "b")
         self.session.add_all((u1, u2))
@@ -170,6 +177,7 @@ class TestDataTables:
 
 
     def test_error(self):
+        """ make sure we are able to capture failures... """
         req = self.make_params()
         req["start"] = "invalid"
 
@@ -190,6 +198,12 @@ class TestDataTables:
 
 
     def test_search(self):
+        """ Test the basic search functionality.
+            This method is not required but here to show that it works
+            The main search/filter method is to use the ?q={"filters":[...]}
+            method from flask-restless that I have incorporated which
+            provides much more flexibility in searching deep relations
+        """
         user, addr = self.make_user("Silly Sally", "Silly Sally Road")
         user2, addr2 = self.make_user("Silly Billy", "Silly Billy Road")
         self.session.add_all((user, user2))
