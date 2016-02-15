@@ -67,7 +67,6 @@ class TestDataTables:
         if search:
             for key, value in search.items():
                 x["search[{}]".format(key)] = str(value)
-        print x
 
         # this mimics an actual request
         y = ""
@@ -77,9 +76,7 @@ class TestDataTables:
         y += "&".join("{}={}".format(k, v) for k, v in x.items() if k != 'draw')
 
 
-        print y
         y = parser.parse(y)
-        print y
 
         # use parser to parse the request into a dict we can use in DataTable
         return y
