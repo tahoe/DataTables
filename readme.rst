@@ -4,7 +4,8 @@ Flask-restful only version of orf/datatables with Flask-restless style filtering
 Installation
 ------------
 
-The package is NOT available on PyPI and is passing tests on Python 2.7, 3.3 and 3.4
+The package is NOT available on PyPI BUT is passing tests on Python 2.7, 3.3 and 3.4
+Working on getting this on PyPI
 
 .. code-block:: bash
 
@@ -13,7 +14,6 @@ The package is NOT available on PyPI and is passing tests on Python 2.7, 3.3 and
 Usage
 -----
 
-NEEDS EDIT
 
 This is SUPER simple. In datatables I provide a function called get_resource that can be used to create a
 datatables api endpoint with full flask-restless style filtering built in.
