@@ -41,6 +41,8 @@ class TestDataTables:
             "draw": "1",
             "search[value]": "",
             "search[regex]": "false",
+            "order[0][column]": "1",
+            "order[0][dir]": "asc",
             "start": str(start),
             "length": str(length)
         }
@@ -54,13 +56,9 @@ class TestDataTables:
             x[b + "[search][value]"] = ""
             x[b + "[search][regex]"] = "false"
 
-        if order:
-            for i, item in enumerate(order or []):
-                for key, value in item.items():
-                    x["order[{}][{}]".format(i, key)] = str(value)
-        else:
-            x["order[0][column]"] = "1"
-            x["order[0][dir]"] = "asc"
+        for i, item in enumerate(order or []):
+            for key, value in item.items():
+                x["order[{}][{}]".format(i, key)] = str(value)
 
         if search:
             for key, value in search.items():
@@ -71,6 +69,8 @@ class TestDataTables:
         y = "{}={}&".format('draw', x['draw'])
         y += "&".join("{}={}".format(k, v) for k, v in x.items() if k != 'draw')
 
+        y = parser.parse(y)
+
         # use parser to parse the request into a dict we can use in DataTable
         return y
 
@@ -80,7 +80,11 @@ class TestDataTables:
 
         req = self.make_params()
 
-        table = DataTable(req, User, self.session)
+        table = DataTable(req, User, self.session.query(User), [
+            "id",
+            ("name", "full_name"),
+            ("address", "address.description"),
+        ])
 
         x = table.json()
 
@@ -94,12 +98,26 @@ class TestDataTables:
         self.session.commit()
 
         req = self.make_params(order=[{"column": 2, "dir": "desc"}])
-        table = DataTable(req, User, self.session)
+        table = DataTable(req,
+                          User,
+                          self.session.query(User),
+                          [
+                              "id",
+                              ("name", "full_name"),
+                              ("address", "address.description")
+                          ])
         result = table.json()
         assert result["data"][0]["address"] == addr_desc.description
 
         req = self.make_params(order=[{"column": 2, "dir": "asc"}])
-        table = DataTable(req, User, self.session)
+        table = DataTable(req,
+                          User,
+                          self.session.query(User),
+                          [
+                              "id",
+                              ("name", "full_name"),
+                              ("address", "address.description")
+                          ])
         result = table.json()
         assert result["data"][0]["address"] == addr_asc.description
 
@@ -113,7 +131,7 @@ class TestDataTables:
                           self.session.query(User),
                           [
                               "id",
-                              ("name", "name", lambda i: "User: " + i.name)
+                              ("name", "full_name", lambda i: "User: " + i.full_name)
                           ])
         result = table.json()
         assert all(r["name"].startswith("User: ") for r in result["data"])
@@ -142,7 +160,7 @@ class TestDataTables:
                           self.session.query(User),
                           [
                               DataColumn(name="id", model_name="id", filter=None),
-                              ("name",
+                              ("full_name",
                               "address"
                           ])
         table.json()
@@ -160,13 +178,13 @@ class TestDataTables:
                           self.session.query(User),
                           [
                               "id",
-                              ("name", "name"),
+                              ("name", "full_name"),
                               ("address", "address.description")
                           ])
 
         x = table.json()
 
-        assert x["data"][0]["name"] == desc_user.name
+        assert x["data"][0]["name"] == desc_user.full_name
 
         req = self.make_params(order=[{"column": 1, "dir": "asc"}], length=100)
 
@@ -175,13 +193,13 @@ class TestDataTables:
                           self.session.query(User),
                           [
                               "id",
-                              ("name", "name"),
+                              ("name", "full_name"),
                               ("address", "address.description")
                           ])
 
         x = table.json()
 
-        assert x["data"][-1]["name"] == desc_user.name
+        assert x["data"][-1]["name"] == desc_user.full_name
 
     def test_error(self):
         req = self.make_params()
@@ -212,7 +230,7 @@ class TestDataTables:
             "value": "Silly Sally"
         })
 
-        table = DataTable(req, User, self.session.query(User), [("name", "name")])
+        table = DataTable(req, User, self.session.query(User), [("name", "full_name")])
         results = table.json()
         assert len(results["data"]) == 1
 
@@ -220,7 +238,7 @@ class TestDataTables:
             "value": "Silly Sall"
         })
 
-        table = DataTable(req, User, self.session.query(User), [("name", "name")])
+        table = DataTable(req, User, self.session.query(User), [("name", "full_name")])
         results = table.json()
         assert len(results["data"]) == 2
 """

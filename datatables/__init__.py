@@ -276,12 +276,10 @@ class DataTable(object):
         return returner
 
     def get_value(self, key, instance):
-        log_warning("get_value passed key: {}, instance: {}".format(key, instance))
         attr = key.model_name
         if "." in attr:
             tmp_list=attr.split(".")
             attr=tmp_list[-1]
-            log_warning("tmp_list is {}, attr is {}".format(tmp_list, attr))
             for sub in tmp_list[:-1]:
                 oldinstance = instance
                 try:
