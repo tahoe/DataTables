@@ -1,6 +1,17 @@
 ====================
 Flask-restful only version of orf/datatables with Flask-restless style filtering
 ====================
+
+Additional Functionality
+------------
+One thing I needed to do so that this would support our needs internally is
+to support arbitrary join depth to be able to do search and sort functionality
+on the results. With Orf's version, I was only able to order by or search on 2
+levels deep of a query result. Now that level is arbitrary such that you can
+provide a column on say a Subnet table that is associated with a location
+through relations like subnet.vlan.switch.rack.location and make the location name
+filterable AND orderable with just "vlan__switch__rack__location__name"
+
 Installation
 ------------
 
