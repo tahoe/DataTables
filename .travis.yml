@@ -1,15 +1,22 @@
 language: python
 python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
-  - "3.5"
-  - "pypy"
-  - "pypy3"
-# command to install dependencies
+- '2.7'
+- '3.3'
+- '3.4'
+- '3.5'
+- pypy
+- pypy3
 install:
-  - "pip install -r travis_requirements.txt"
-  - "python setup.py install"
-# command to run tests
+- pip install -r travis_requirements.txt
+- python setup.py install
 script: coverage run --source=datatables -m pytest -v
 after_success: coveralls
+deploy:
+  provider: pypi
+  user: dennis.durling
+  password:
+    secure: G0EUdA7x+yLCEXE3WvqZxpWL/+Z07MEoQJu1R8vuDftHRANYTsv36Mn71UrOhsfKb4rfzPxpDTttCyRwTcGSAFlKo3rpx7O1qwEzqlzLszZ6Xxz86kY+xd2rokw07rop3BPdiP//cbRH5lF9abBYyYQ09J7Ci1AZxBVOtkNXVpHq62kly+f3H+nnS5oWZmxFesPpjjf3l3Ptv4kQa+kLUtMGhB7+cXySIoiLQJ2oQxA08y5RIj/OdcNpBn+u31uLD7Z/e1o25NPmLHrR2MXA7eE7vKyBIpsDvNS51Hz0LiuMRKKDmdbGnaNURz3Y4XKCelN0VFE/MTq62MA2j3ZHqVp8UXRmQmS3i05mf/2C2J29uxMEibnr0KCplJmhUG7j32D+BIC8yYosyQTljN9LG0tp9kInKgC0muPfMBXCg3ueuT+xYHK5xVDAJlTceSvh5JVq9dxogNP4OxlU4HiCwMnHN1PHsUEtU6YxgK0jmqhkJH1SXjNPzqv/WTCqDqiVULkOgI6wlIcX4oj0lf5KmgvVYq9CTk7WLfpcP8xj2YjnuIgGzPxtwL1ZSD2rebD0pqfFuAv40/uS7H2gY9YNhlssvr8aoGkBVV7xjkUVPftlxzD0/wsIco4KS6ktgPtnooAhWDVIA4SaIeu5fui47c6SO11q/uBS7TwkSgzFjWw=
+  on:
+    tags: true
+    distributions: sdist bdist_wheel
+    repo: tahoe/flask_datatables
