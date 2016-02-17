@@ -9,7 +9,10 @@ from flask_datatables import views
 from flask_datatables.views import apihelpers as helpme
 import sys
 
-DEBUG = current_app.debug
+if current_app:
+    DEBUG = current_app.debug
+else:
+    DEBUG = False
 
 if sys.version_info.major == 3:
     unicode = str
