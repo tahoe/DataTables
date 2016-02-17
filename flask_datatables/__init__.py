@@ -9,11 +9,6 @@ from flask_datatables import views
 from flask_datatables.views import apihelpers as helpme
 import sys
 
-if current_app:
-    DEBUG = current_app.debug
-else:
-    DEBUG = False
-
 if sys.version_info.major == 3:
     unicode = str
 
@@ -61,7 +56,7 @@ def get_resource(Resource, Table, Session, basepath="/"):
             if 'q' in parsed.keys():
                 query = views.search(Session, Table, parsed)
 
-            if DEBUG:
+            if current_app and current_app.debug:
                 print(str(query), file=sys.stderr)
             # get our DataTable object
             dtobj = DataTable( parsed, Table, query, dtcols)
@@ -164,7 +159,7 @@ class DataTable(object):
                             #self.query = self.query.join(curmodel, isouter=True)
                         if joincols[i+1] not in seencols:
                             self.query = self.query.join(getattr(curmodel, joincols[i+1]), isouter=True)
-        if DEBUG:
+        if current_app and current_app.debug:
             print(str(self.query), file=sys.stderr)
 
     @staticmethod
