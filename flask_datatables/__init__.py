@@ -1,3 +1,4 @@
+from __future__ import print_function
 from collections import namedtuple
 from sqlalchemy import and_, or_, desc, asc
 from sqlalchemy.orm import relation, backref, synonym, outerjoin, join, eagerload, relationship, validates
@@ -7,7 +8,6 @@ from flask import request, current_app
 from flask_datatables import views
 from flask_datatables.views import apihelpers as helpme
 import sys
-from __future__ import print_function
 
 DEBUG = current_app.debug
 
