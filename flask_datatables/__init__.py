@@ -3,10 +3,13 @@ from sqlalchemy import and_, or_, desc, asc
 from sqlalchemy.orm import relation, backref, synonym, outerjoin, join, eagerload, relationship, validates
 import inspect
 from querystring_parser import parser
-from flask import request
+from flask import request, current_app
 from flask_datatables import views
 from flask_datatables.views import apihelpers as helpme
 import sys
+from __future__ import print_function
+
+DEBUG = current_app.debug
 
 if sys.version_info.major == 3:
     unicode = str
@@ -55,6 +58,8 @@ def get_resource(Resource, Table, Session, basepath="/"):
             if 'q' in parsed.keys():
                 query = views.search(Session, Table, parsed)
 
+            if DEBUG:
+                print(str(query), file=sys.stderr)
             # get our DataTable object
             dtobj = DataTable( parsed, Table, query, dtcols)
             # return the query result in json
@@ -156,6 +161,8 @@ class DataTable(object):
                             #self.query = self.query.join(curmodel, isouter=True)
                         if joincols[i+1] not in seencols:
                             self.query = self.query.join(getattr(curmodel, joincols[i+1]), isouter=True)
+        if DEBUG:
+            print(str(self.query), file=sys.stderr)
 
     @staticmethod
     def coerce_value(key, value):

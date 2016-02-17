@@ -6,10 +6,10 @@ desc = open("readme.rst").read() if os.path.isfile("readme.rst") else ""
 
 setup(
     name='flask_datatables',
-    version='0.6.6',
+    version='0.6.7',
     packages=['flask_datatables', 'flask_datatables.views'],
     url='https://github.com/tahoe/flask_datatables/',
-    download_url='https://github.com/tahoe/flask_datatables/tarball/0.6.6',
+    download_url='https://github.com/tahoe/flask_datatables/tarball/0.6.7',
     license='MIT',
     long_description=desc,
     keywords='datatables sqlalchemy flask',
@@ -33,9 +33,10 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     install_requires=[
-        'querystring_parser',
-        'sqlalchemy',
-        'flask',
-        'flask-restful'
+        'querystring_parser==1.2.3',
+        'sqlalchemy>=1.0.11',
+        'flask>=0.10.1',
+        'flask-restful>=0.3.5'
     ],
 )
+
