@@ -12,6 +12,10 @@ import sys
 if sys.version_info.major == 3:
     unicode = str
 
+def log_debug(message):
+    if current_app and current_app.debug:
+        print(message, file=sys.stderr)
+
 def get_resource(Resource, Table, Session, basepath="/"):
     """ Return a flask-restful datatables resource for SQLAlchemy
 
@@ -56,8 +60,7 @@ def get_resource(Resource, Table, Session, basepath="/"):
             if 'q' in parsed.keys():
                 query = views.search(Session, Table, parsed)
 
-            if current_app and current_app.debug:
-                print(str(query), file=sys.stderr)
+            log_debug(str(query))
             # get our DataTable object
             dtobj = DataTable( parsed, Table, query, dtcols)
             # return the query result in json
@@ -140,27 +143,41 @@ class DataTable(object):
         # only eliminates warnings but still...
         seencols = []
         for column in (col for col in self.columns if "." in col.model_name):
+            # of of table user model_name can look like family.address.city or more/less dots
+            # joincols would be ['family', 'address'] leaving out the actual column, city
             joincols = column.model_name.split(".")[:-1]
+            log_debug("joincols: {}".format(joincols))
 
             # join the first column, which is off of our class
+            # check if 'family' is joined already
             if joincols[0] not in seencols:
+                # append family to seencols so we don't rejoin later
+                log_debug("appending {} to seencols".format(joincols[0]))
                 seencols.append(joincols[0])
+                # outer join family
                 self.query = self.query.join(joincols[0], isouter=True)
-            curmodel = self.model
+                log_debug("query is now: {}".format(self.query))
+
+            # check if we are doing more than the simple user.famly join (in this example user.family.address)
             if len(joincols) > 1:
-                for i, joincol in enumerate(joincols):
-                    # we don't want to do this to the last item
-                    if i != len(joincols) -1:
-                        curmodel = helpme.get_related_model(curmodel, joincol)
-                        # we don't want to do this for columns we already did also
-                        if joincol not in seencols:
-                            seencols.append(joincol)
-                            #seencols.append(joincols[i+1])
-                            #self.query = self.query.join(curmodel, isouter=True)
-                        if joincols[i+1] not in seencols:
-                            self.query = self.query.join(getattr(curmodel, joincols[i+1]), isouter=True)
-        if current_app and current_app.debug:
-            print(str(self.query), file=sys.stderr)
+
+                # copy our table to curmodel
+                curmodel = self.model
+                log_debug("curmodel is now: {}".format(curmodel.__tablename__))
+
+                # we don't want to do this to the last item ([:-1])
+                for i, joincol in enumerate(joincols[:-1]):
+
+                    # helper method to get the table for the current related model
+                    curmodel = helpme.get_related_model(curmodel, joincol)
+
+                    # we don't want to do this for columns we already did also
+                    if joincol not in seencols:
+                        seencols.append(joincol)
+                    if joincols[i+1] not in seencols:
+                        self.query = self.query.join(getattr(curmodel, joincols[i+1]), isouter=True)
+                        seencols.append(joincol[i+1])
+        log_debug(str(self.query))
 
     @staticmethod
     def coerce_value(key, value):
