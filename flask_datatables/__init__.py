@@ -141,21 +141,27 @@ class DataTable(object):
         # get only unique relationships to join
         # fix for when there are multiple columns within the same joined table
         # only eliminates warnings but still...
+        seenjoins = []
         seencols = []
         for column in (col for col in self.columns if "." in col.model_name):
             # of of table user model_name can look like family.address.city or more/less dots
             # joincols would be ['family', 'address'] leaving out the actual column, city
+            log_debug("column: {}".format(column))
             joincols = column.model_name.split(".")[:-1]
             log_debug("joincols: {}".format(joincols))
 
+            curtable = helpme.get_related_model(self.model, joincols[0]).__tablename__
             # join the first column, which is off of our class
             # check if 'family' is joined already
-            if joincols[0] not in seencols:
+            if joincols[0] not in seencols and curtable not in seenjoins:
+                seenjoins.append(curtable)
+                log_debug("seenjoins is now: {}".format(seenjoins))
                 # append family to seencols so we don't rejoin later
                 log_debug("appending {} to seencols".format(joincols[0]))
                 seencols.append(joincols[0])
                 # outer join family
                 self.query = self.query.join(joincols[0], isouter=True)
+                #self.query = self.query.join(getattr(aliased(curmodel), joincols[1]), isouter=True)
                 log_debug("query is now: {}".format(self.query))
 
             # check if we are doing more than the simple user.famly join (in this example user.family.address)
