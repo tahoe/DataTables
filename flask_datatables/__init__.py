@@ -1,7 +1,7 @@
 from __future__ import print_function
 from collections import namedtuple
 from sqlalchemy import and_, or_, desc, asc
-from sqlalchemy.orm import relation, backref, synonym, outerjoin, join, eagerload, relationship, validates
+from sqlalchemy.orm import relation, backref, synonym, outerjoin, join, eagerload, relationship, validates, aliased
 import inspect
 from querystring_parser import parser
 from flask import request, current_app
@@ -153,16 +153,6 @@ class DataTable(object):
             curtable = helpme.get_related_model(self.model, joincols[0]).__tablename__
             # join the first column, which is off of our class
             # check if 'family' is joined already
-            if joincols[0] not in seencols and curtable not in seenjoins:
-                seenjoins.append(curtable)
-                log_debug("seenjoins is now: {}".format(seenjoins))
-                # append family to seencols so we don't rejoin later
-                log_debug("appending {} to seencols".format(joincols[0]))
-                seencols.append(joincols[0])
-                # outer join family
-                self.query = self.query.join(joincols[0], isouter=True)
-                #self.query = self.query.join(getattr(aliased(curmodel), joincols[1]), isouter=True)
-                log_debug("query is now: {}".format(self.query))
 
             # check if we are doing more than the simple user.famly join (in this example user.family.address)
             if len(joincols) > 1:
@@ -176,13 +166,26 @@ class DataTable(object):
 
                     # helper method to get the table for the current related model
                     curmodel = helpme.get_related_model(curmodel, joincol)
+                    log_debug("i -> {}, joincol -> {}".format(i, joincol))
 
                     # we don't want to do this for columns we already did also
                     if joincol not in seencols:
+                        log_debug("joincol not in seencols: {}, {}".format(joincol, seencols))
                         seencols.append(joincol)
                     if joincols[i+1] not in seencols:
-                        self.query = self.query.join(getattr(curmodel, joincols[i+1]), isouter=True)
-                        seencols.append(joincol[i+1])
+                        log_debug("joincols[i+1] not in seencols: {}, {}".format(joincols[i+1], seencols))
+                        # get the tablename so we can log that we joined with it
+                        joinmodel = aliased(helpme.get_related_model(curmodel, joincols[i+1]))
+                        if joinmodel.__tablename__ in seenjoins:
+                            continue
+                        # append to seen joins
+                        seenjoins.append(joinmodel.__tablename__)
+                        # get the remote table object like User.domus rather than XenDomU like above aliased will pull out
+                        joinmodel = getattr(curmodel, joincols[i+1])
+                        log_debug("joinmodel: {}".format(joinmodel))
+                        #self.query = self.query.join(getattr(curmodel, joincols[i+1]), isouter=True)
+                        self.query = self.query.join(joinmodel, isouter=True)
+                        seencols.append(joincols[i+1])
         log_debug(str(self.query))
 
     @staticmethod
