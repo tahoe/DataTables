@@ -1,6 +1,6 @@
 from __future__ import print_function
 from collections import namedtuple
-from sqlalchemy import and_, or_, desc, asc
+from sqlalchemy import and_, or_, desc, asc, alias
 from sqlalchemy.orm import relation, backref, synonym, outerjoin, join, eagerload, relationship, validates, aliased
 import inspect
 from querystring_parser import parser
@@ -151,8 +151,19 @@ class DataTable(object):
             log_debug("joincols: {}".format(joincols))
 
             curtable = helpme.get_related_model(self.model, joincols[0]).__tablename__
+            log_debug("curtable: {}, joincols: {}".format(curtable, joincols))
             # join the first column, which is off of our class
             # check if 'family' is joined already
+            if joincols[0] not in seencols and curtable not in seenjoins:
+                seenjoins.append(curtable)
+                log_debug("seenjoins is now: {}".format(seenjoins))
+                # append family to seencols so we don't rejoin later
+                log_debug("appending {} to seencols".format(joincols[0]))
+                seencols.append(joincols[0])
+                # outer join family
+                log_debug("joincols[0] is {}".format(joincols[0]))
+                self.query = self.query.join(joincols[0], isouter=True)
+                log_debug("query is now: {}".format(self.query))
 
             # check if we are doing more than the simple user.famly join (in this example user.family.address)
             if len(joincols) > 1:
