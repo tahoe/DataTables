@@ -53,7 +53,10 @@ def get_resource(Resource, Table, Session, basepath="/"):
             #    print col
 
             # pre build the query so we can add filters to it here
-            query = Table.query
+            try:
+                query = Table.query  # Flask-SQLAlchemy
+            except:
+                query = Session.query(Table)  # vanilla SQLALchemy
 
             # check if we are filtering the rows some how
             # this uses the restless view code
