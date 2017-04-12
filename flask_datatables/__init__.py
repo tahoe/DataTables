@@ -40,7 +40,7 @@ def get_resource(Resource, Table, Session, basepath="/"):
             resource, path, endpoint = get_resource(Resource, tableObj, Session, basepath="/")
             api.add_resource(resource, path, endpoint=endpoint)
 
-        
+
     """
     class TmpResource(Resource):
         def get(self):
@@ -53,7 +53,10 @@ def get_resource(Resource, Table, Session, basepath="/"):
             #    print col
 
             # pre build the query so we can add filters to it here
-            query = Session.query(Table)
+            try:
+                query = Table.query  # Flask-SQLAlchemy
+            except:
+                query = Session.query(Table)  # vanilla SQLALchemy
 
             # check if we are filtering the rows some how
             # this uses the restless view code
@@ -342,6 +345,3 @@ class DataTable(object):
             r = ""
 
         return r() if inspect.isroutine(r) else r
-
-
-

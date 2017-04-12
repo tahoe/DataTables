@@ -43,7 +43,8 @@ class TestDataTables:
 
         return u, addr
 
-    def make_params(self, order=None, search=None, start=0, length=10, urlfilter=None):
+    def make_params_str(self, order=None, search=None, start=0, length=10, urlfilter=None,
+                    columns=("id", "name", "address")):
         x = {
             "draw": "1",
             "search[value]": "",
@@ -54,7 +55,7 @@ class TestDataTables:
             "length": str(length)
         }
 
-        for i, item in enumerate(("id", "name", "address")):
+        for i, item in enumerate(columns):
             b = "columns[{}]".format(i)
             x[b + "[data]"] = item
             x[b + "[name]"] = ""
@@ -78,11 +79,13 @@ class TestDataTables:
         y += "{}={}&".format('draw', x['draw'])
         y += "&".join("{}={}".format(k, v) for k, v in x.items() if k != 'draw')
 
-
-        y = parser.parse(y)
-
-        # use parser to parse the request into a dict we can use in DataTable
         return y
+
+    def make_params(self, **kwargs):
+        y = self.make_params_str(**kwargs)
+        # use parser to parse the request into a dict we can use in DataTable
+        return parser.parse(y)
+
 
 
     def test_basic_function(self):
@@ -227,3 +230,21 @@ class TestDataTables:
         assert len(results["data"]) == 2
 
 
+    def test_datatables(self):
+        """ Test the datatables function get_resource """
+        import flask_restful as rest
+        from flask import current_app, Flask
+        app = current_app or Flask('test')
+        api = rest.Api(app)
+
+        Resource, path, endpoint = get_resource(rest.Resource, User, self.session, basepath='/api/')
+        api.add_resource(Resource, path, endpoint=endpoint)
+
+        client = app.test_client()
+        params = self.make_params_str(columns=('id', 'full_name', 'created_at'))
+        response = client.get('/api/users?%s' % params)
+        assert response.status_code == 200
+
+        str_response = response.data.decode('utf-8')
+        obj = json.loads(str_response)
+        assert len(obj['data']) == 10
