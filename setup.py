@@ -35,9 +35,8 @@ setup(
     install_requires=[
         'querystring_parser==1.2.3',
         'sqlalchemy>=1.0.11',
-        'flask==0.10.1',
+        'flask>=0.10.1',
         'flask-restful>=0.3.5',
         'Faker==0.7.12',
     ],
 )
-
