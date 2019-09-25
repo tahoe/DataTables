@@ -63,9 +63,17 @@ def get_resource(Resource, Table, Session, basepath="/"):
             if 'q' in parsed.keys():
                 query = views.search(Session, Table, parsed)
 
+            total_query = 'select count(id) from {0}'.format(Table.__tablename__)                                                                     
+            total_records = Session.execute(total_query).first()
+            if total_records:
+                total_recs = int(total_records[0])
+                log_debug("total recs for table {} is {}".format(Table.__tablename__, total_recs))                                                    
+            else:
+                total_recs = 0
+
             log_debug(str(query))
             # get our DataTable object
-            dtobj = DataTable( parsed, Table, query, dtcols)
+            dtobj = DataTable( parsed, Table, query, dtcols, total_recs)
             # return the query result in json
 
             return dtobj.json()
@@ -105,13 +113,14 @@ class DataTablesError(ValueError):
 
 
 class DataTable(object):
-    def __init__(self, params, model, query, columns):
+    def __init__(self, params, model, query, columns, total_recs):
         self.params = params
         self.model = model
         self.query = query
         self.data = {}
         self.columns = []
         self.columns_dict = {}
+        self.total_recs = total_recs
 
         for col in columns:
             name, model_name, filter_func = None, None, None
@@ -260,7 +269,8 @@ class DataTable(object):
         search = self.params["search"]
 
         query = self.query
-        total_records = query.count()
+        # total_records = query.count()
+	total_records = self.total_recs
 
         # handle searches here rather than using the old searchable function
         if search.get("value", None):
