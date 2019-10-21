@@ -270,7 +270,7 @@ class DataTable(object):
 
         query = self.query
         # total_records = query.count()
-	total_records = self.total_recs
+        total_records = self.total_recs
 
         # handle searches here rather than using the old searchable function
         if search.get("value", None):
